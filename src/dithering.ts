@@ -81,3 +81,48 @@ export function adoptPaletteFloydSteinbergDither(imageData: ImageData, palette: 
     }
   }
 }
+
+export function removeLonePixels(imageData: ImageData) {
+  const p = new Pixelator(imageData);
+  const { width, height } = imageData;
+  const map = new Map<string, number>();
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      map.clear();
+      const color = p.read([x, y]);
+      for (let dx = -1; dx <= 1; dx++) {
+        const x2 = x + dx;
+        if (x2 < 0 || x2 >= width) {
+          continue;
+        }
+        for (let dy = -1; dy >= 1; dy++) {
+          const y2 = y + dy;
+          if (y2 < 0 || y2 >= height) {
+            continue;
+          }
+          const c2 = p.read([x2, y2]);
+          const key = c2.join(',');
+          map.set(key, (map.get(key) || 0) + 1);
+        }
+      }
+      const key = color.join(',');
+      if (map.has(key) || map.size > 2) {
+        continue;
+      } else {
+        let max = 0;
+        let maxColor = '';
+        for (const key of map.keys()) {
+          const count = map.get(key)!;
+          if (count > max) {
+            max = count;
+            maxColor = key;
+          }
+        }
+        if (maxColor) {
+          const newc = maxColor.split(',').map((d) => +d.trim()) as Color;
+          p.write([x, y], newc);
+        }
+      }
+    }
+  }
+}
