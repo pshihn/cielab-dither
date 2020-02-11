@@ -82,10 +82,15 @@ export function adoptPaletteFloydSteinbergDither(imageData: ImageData, palette: 
   }
 }
 
+interface ColorCount {
+  color: Color;
+  count: number;
+}
+
 export function removeLonePixels(imageData: ImageData) {
   const p = new Pixelator(imageData);
   const { width, height } = imageData;
-  const map = new Map<string, number>();
+  const map = new Map<string, ColorCount>();
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       map.clear();
@@ -95,32 +100,33 @@ export function removeLonePixels(imageData: ImageData) {
         if (x2 < 0 || x2 >= width) {
           continue;
         }
-        for (let dy = -1; dy >= 1; dy++) {
+        for (let dy = -1; dy <= 1; dy++) {
           const y2 = y + dy;
           if (y2 < 0 || y2 >= height) {
             continue;
           }
           const c2 = p.read([x2, y2]);
           const key = c2.join(',');
-          map.set(key, (map.get(key) || 0) + 1);
+          const keyValue = map.get(key) || { color: c2, count: 0 };
+          keyValue.count++;
+          map.set(key, keyValue);
         }
       }
       const key = color.join(',');
       if (map.has(key) || map.size > 2) {
         continue;
       } else {
-        let max = 0;
-        let maxColor = '';
-        for (const key of map.keys()) {
-          const count = map.get(key)!;
-          if (count > max) {
-            max = count;
-            maxColor = key;
+        const values: ColorCount[] = [];
+        map.forEach((v) => values.push(v));
+        if (values.length === 1) {
+          p.write([x, y], values[0].color);
+        } else {
+          const [v1, v2] = values;
+          if (v1.count >= (2 * v2.count)) {
+            p.write([x, y], v1.color);
+          } else if (v2.count >= (2 * v1.count)) {
+            p.write([x, y], v2.color);
           }
-        }
-        if (maxColor) {
-          const newc = maxColor.split(',').map((d) => +d.trim()) as Color;
-          p.write([x, y], newc);
         }
       }
     }
