@@ -1,0 +1,33 @@
+{
+  "name": "cielab-dither",
+  "version": "0.1.0",
+  "description": "Image dithering in the CIELAB color space",
+  "main": "./bin/dithering.js",
+  "module": "./bin/dithering.js",
+  "types": "./bin/dithering.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "tslint -p tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pshihn/cielab-dither.git"
+  },
+  "keywords": [
+    "image",
+    "dither",
+    "dithering",
+    "reduce-colors"
+  ],
+  "author": "Preet Shihn",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pshihn/cielab-dither/issues"
+  },
+  "homepage": "https://github.com/pshihn/cielab-dither#readme",
+  "devDependencies": {
+    "tslint": "^6.0.0",
+    "typescript": "^3.7.5"
+  }
+}
