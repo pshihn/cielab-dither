@@ -1,6 +1,6 @@
 {
   "name": "cielab-dither",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Image dithering in the CIELAB color space",
   "main": "./bin/dithering.js",
   "module": "./bin/dithering.js",

@@ -101,6 +101,9 @@ export function removeLonePixels(imageData: ImageData) {
           continue;
         }
         for (let dy = -1; dy <= 1; dy++) {
+          if (dy === 0 && dx === 0) {
+            continue;
+          }
           const y2 = y + dy;
           if (y2 < 0 || y2 >= height) {
             continue;
