@@ -6,6 +6,31 @@ const _LabRgbMap = new Map<string, Color>();
 const _RgbHsvMap = new Map<string, Color>();
 const _HsvRgbMap = new Map<string, Color>();
 
+export function hexToRgb(hex: string): Color {
+  let rgb: Color = [0, 0, 0];
+  if ((hex.length === 4) || hex.length > 6) {
+    hex = hex.substring(1);
+  }
+  if (hex.length === 3) {
+    rgb = [
+      +`0x${hex[0]}${hex[0]}`,
+      +`0x${hex[1]}${hex[1]}`,
+      +`0x${hex[2]}${hex[2]}`
+    ];
+  } else if (hex.length >= 6) {
+    rgb = [
+      +`0x${hex[0]}${hex[1]}`,
+      +`0x${hex[2]}${hex[3]}`,
+      +`0x${hex[4]}${hex[5]}`
+    ];
+  }
+  return rgb;
+}
+
+export function hexToLab(hex: string): Color {
+  return rgbToLab(hexToRgb(hex));
+}
+
 export function rgbToLab(rgb: Color): Color {
   const key = rgb.join(',');
   if (_RgbLabMap.has(key)) {
