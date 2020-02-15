@@ -1,5 +1,5 @@
 import { Pixelator, Point } from './pixelator';
-import { Color, closestColor, addColors, subtractColors, colorGain } from './colors';
+import { Color, closestColor, addColors, subtractColors, colorGain, rgbToLab, labToRgb, ColorType, hsvToRgb, rgbToHsv } from './colors';
 
 const diffMap = new Map<Color[], Map<string, Color>>();
 
@@ -29,7 +29,7 @@ export function adoptPaletteNoDither(imageData: ImageData, palette: Color[]) {
   }
 }
 
-export function adoptPaletteFloydSteinbergDither(imageData: ImageData, palette: Color[]) {
+export function adoptPaletteFloydSteinbergDither(imageData: ImageData, palette: Color[], colorSpace: ColorType) {
   const carryOvers = new Map<string, Color>();
   const p = new Pixelator(imageData);
   const { width, height } = imageData;
@@ -37,12 +37,18 @@ export function adoptPaletteFloydSteinbergDither(imageData: ImageData, palette: 
     for (let x = 0; x < width; x++) {
       const point: Point = [x, y];
       const pointKey = point.join(',');
-      let color = p.read([x, y], 'lab');
+      let color = p.read([x, y], colorSpace);
       const carryOverColor = carryOvers.get(pointKey);
       if (carryOverColor) {
         color = addColors(color, carryOverColor);
       }
-      const closest = getClosestColor(color, palette);
+      const labColor = (colorSpace === 'lab') ? color : ((colorSpace === 'rgb') ? rgbToLab(color) : rgbToLab(hsvToRgb(color)));
+      let closest = getClosestColor(labColor, palette);
+      if (colorSpace === 'rgb') {
+        closest = labToRgb(closest);
+      } else if (colorSpace === 'hsv') {
+        closest = rgbToHsv(labToRgb(closest));
+      }
 
       // find quant error
       const diff = subtractColors(color, closest);
@@ -77,7 +83,7 @@ export function adoptPaletteFloydSteinbergDither(imageData: ImageData, palette: 
         carryOvers.set(nextKey, qError);
       }
 
-      p.write([x, y], closest, 'lab');
+      p.write([x, y], closest, colorSpace);
     }
   }
 }
